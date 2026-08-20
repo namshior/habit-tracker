@@ -1,0 +1,47 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum SkipPolicy {
+  FREEZE // Preserves streak without incrementing or resetting
+  RESET  // Breaks streak and resets count to 0
+}
+
+enum LogStatus {
+  DONE    // Completed habit for the date
+  SKIPPED // Explicitly skipped habit for the date
+}
+
+model Habit {
+  id          String     @id @default(cuid())
+  title       String
+  description String?
+  skipPolicy  SkipPolicy @default(FREEZE)
+  isArchived  Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  logs        HabitLog[]
+
+  @@index([isArchived])
+}
+
+model HabitLog {
+  id        String    @id @default(cuid())
+  habitId   String
+  date      String    // ISO calendar date format: YYYY-MM-DD
+  status    LogStatus
+  loggedAt  DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  habit     Habit     @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@unique([habitId, date])
+  @@index([habitId, date])
+  @@index([date])
+}
