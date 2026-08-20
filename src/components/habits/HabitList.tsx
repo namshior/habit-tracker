@@ -23,6 +23,7 @@ export function HabitList({
 }: HabitListProps) {
   const [filter, setFilter] = useState<'ACTIVE' | 'ARCHIVED' | 'ALL'>('ACTIVE');
   const [searchQuery, setSearchQuery] = useState('');
+  const [openHistoryHabitId, setOpenHistoryHabitId] = useState<string | null>(null);
 
   const filteredHabits = habits.filter((h) => {
     // Filter by archive status
@@ -53,11 +54,10 @@ export function HabitList({
           <button
             type="button"
             onClick={() => setFilter('ACTIVE')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-              filter === 'ACTIVE'
-                ? 'bg-primary-600 text-white shadow-glow'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${filter === 'ACTIVE'
+              ? 'bg-primary-600 text-white shadow-glow'
+              : 'text-slate-400 hover:text-slate-200'
+              }`}
           >
             Active ({activeCount})
           </button>
@@ -65,11 +65,10 @@ export function HabitList({
             <button
               type="button"
               onClick={() => setFilter('ARCHIVED')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                filter === 'ARCHIVED'
-                  ? 'bg-primary-600 text-white shadow-glow'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${filter === 'ARCHIVED'
+                ? 'bg-primary-600 text-white shadow-glow'
+                : 'text-slate-400 hover:text-slate-200'
+                }`}
             >
               Archived ({archivedCount})
             </button>
@@ -99,6 +98,9 @@ export function HabitList({
               referenceDate={referenceDate}
               onEdit={onEditHabit}
               onRefresh={onRefresh}
+              isHistoryOpen={openHistoryHabitId === habit.id}
+              onHistoryOpen={() => setOpenHistoryHabitId(habit.id)}
+              onHistoryClose={() => setOpenHistoryHabitId(null)}
             />
           ))}
         </div>
@@ -112,16 +114,16 @@ export function HabitList({
             {searchQuery
               ? 'No matching habits found'
               : filter === 'ARCHIVED'
-              ? 'No archived habits'
-              : 'No habits tracked yet'}
+                ? 'No archived habits'
+                : 'No habits tracked yet'}
           </h3>
 
           <p className="text-xs text-slate-400 max-w-xs mb-6 leading-relaxed">
             {searchQuery
               ? 'Try adjusting your search keywords.'
               : filter === 'ARCHIVED'
-              ? 'Habits you archive will appear here.'
-              : 'Create your first daily habit to start building streaks and momentum.'}
+                ? 'Habits you archive will appear here.'
+                : 'Create your first daily habit to start building streaks and momentum.'}
           </p>
 
           {!searchQuery && filter === 'ACTIVE' ? (

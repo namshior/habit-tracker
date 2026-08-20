@@ -5,15 +5,19 @@ import { HabitWithSummary, DayStatus } from '@/lib/domain/types';
 import { StreakBadge } from './StreakBadge';
 import { DailyCheckoff } from './DailyCheckoff';
 import { HabitWeeklyMatrix } from './HabitWeeklyMatrix';
+import { HabitHistoryCalendar } from './HabitHistoryCalendar';
 import { archiveHabitAction, deleteHabitAction, unarchiveHabitAction } from '@/actions/habits';
 import { useToast } from '@/components/ui/Toast';
 import { MoreVertical, Edit2, Archive, Trash2, RotateCcw } from 'lucide-react';
 
 export interface HabitCardProps {
   habit: HabitWithSummary;
-  referenceDate: string; // YYYY-MM-DD
+  referenceDate: string;
   onEdit: (habit: HabitWithSummary) => void;
   onRefresh?: () => void;
+  isHistoryOpen: boolean;
+  onHistoryOpen: () => void;
+  onHistoryClose: () => void;
 }
 
 export function HabitCard({
@@ -21,6 +25,9 @@ export function HabitCard({
   referenceDate,
   onEdit,
   onRefresh,
+  isHistoryOpen,
+  onHistoryOpen,
+  onHistoryClose,
 }: HabitCardProps) {
   const { toast } = useToast();
   const [showMenu, setShowMenu] = useState(false);
@@ -29,8 +36,8 @@ export function HabitCard({
   const initialTodayStatus: DayStatus = habit.summary.isTodayCompleted
     ? 'DONE'
     : habit.summary.isTodaySkipped
-    ? 'SKIPPED'
-    : 'PENDING';
+      ? 'SKIPPED'
+      : 'PENDING';
 
   const handleArchive = async () => {
     setShowMenu(false);
@@ -73,7 +80,7 @@ export function HabitCard({
   return (
     <div className="glass-card rounded-2xl p-5 border border-border/80 hover:border-slate-700 transition-all duration-200 shadow-lg relative group">
       {/* Top Header Row: Title, Skip Policy Badge, & Action Menu */}
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex items-start gap-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap mb-1">
             <h3 className="text-base font-semibold text-white tracking-tight truncate">
@@ -92,6 +99,15 @@ export function HabitCard({
             </p>
           ) : null}
         </div>
+
+        {/* View History */}
+        <button
+          type="button"
+          onClick={onHistoryOpen}
+          className="shrink-0 px-3 py-1.5 rounded-lg text-[11px] font-semibold text-primary-300 border border-primary-500/30 bg-primary-500/5 hover:bg-primary-500/10 hover:border-primary-500/50 transition-colors whitespace-nowrap"
+        >
+          View History
+        </button>
 
         {/* Action Menu (Edit, Archive, Delete) */}
         <div className="relative shrink-0">
@@ -176,6 +192,16 @@ export function HabitCard({
         logs={habit.logs}
         skipPolicy={habit.skipPolicy}
         referenceDate={referenceDate}
+        onLogUpdated={() => onRefresh?.()}
+      />
+
+      <HabitHistoryCalendar
+        isOpen={isHistoryOpen}
+        onClose={onHistoryClose}
+        habitId={habit.id}
+        habitTitle={habit.title}
+        logs={habit.logs}
+        skipPolicy={habit.skipPolicy}
         onLogUpdated={() => onRefresh?.()}
       />
     </div>
